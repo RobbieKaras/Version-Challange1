@@ -1,74 +1,56 @@
-// 1. Initialize Map
+// 1. Setup Map
 const incidentLoc = [38.4495, -78.8689];
 const map = L.map('map', { zoomControl: false }).setView(incidentLoc, 16);
 
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
-// FIX: Force the map to fill the container 100ms after load
-setTimeout(() => { map.invalidateSize(); }, 100);
+// 2. Layer Management
+const unitLayer = L.layerGroup().addTo(map);
+const hydrantLayer = L.layerGroup().addTo(map);
 
-// 2. Layer Groups
-const layers = {
-    incident: L.layerGroup().addTo(map),
-    units: L.layerGroup().addTo(map),
-    hydrants: L.layerGroup()
-};
+// 3. Add Demo Data
+// Fire Incident
+L.marker(incidentLoc, {
+    icon: L.divIcon({
+        className: 'hazard-pulse',
+        html: '<div class="bg-red-600 w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-sm">🔥</div>',
+        iconSize: [32, 32]
+    })
+}).addTo(map);
 
-// 3. Demo Data
-const units = [
-    { id: "E-101", status: "On Scene", latlng: [38.4502, -78.8713] },
-    { id: "T-04",  status: "Operating", latlng: [38.4493, -78.8711] },
-    { id: "M-2",   status: "En Route", latlng: [38.4489, -78.8722] }
+// Units
+const engineIcon = L.divIcon({ className: 'bg-red-500 w-3 h-3 rounded-sm border border-white' });
+L.marker([38.4510, -78.8675], { icon: engineIcon }).addTo(unitLayer).bindTooltip("E-101", { permanent: true, className: 'unit-label' });
+
+// Hydrants
+L.circleMarker([38.4491, -78.8698], { radius: 5, color: '#3b82f6', fillOpacity: 0.8 }).addTo(hydrantLayer);
+
+// 4. Toggle Logic
+function toggleLayer(name) {
+    const layer = name === 'units' ? unitLayer : hydrantLayer;
+    map.hasLayer(layer) ? map.removeLayer(layer) : map.addLayer(layer);
+}
+
+// 5. Live Feed Simulation
+const demoNotes = [
+    "PD on scene: Smoke confirmed from Side Alpha.",
+    "E-101: Arriving on scene. Setting up Command.",
+    "CAUTION: Basement storage includes highly flammable oxidizers.",
+    "TRUCK 04: Primary search initiated on Floor 1."
 ];
 
-// Add Incident Marker
-L.circleMarker(incidentLoc, { radius: 10, color: 'red', fillOpacity: 0.8 }).addTo(layers.incident);
+let noteIdx = 0;
+setInterval(() => {
+    if (noteIdx < demoNotes.length) {
+        const div = document.createElement('div');
+        div.className = "feed-entry";
+        div.innerHTML = `<span class="text-blue-400">[${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}]</span> ${demoNotes[noteIdx]}`;
+        document.getElementById('dispatch-feed').prepend(div);
+        noteIdx++;
+    }
+}, 8000);
 
-// Add Unit Markers & Fill Drawer
-const list = document.getElementById("unitList");
-units.forEach(u => {
-    // Add to Map
-    L.marker(u.latlng).addTo(layers.units).bindTooltip(u.id, { permanent: true });
-    
-    // Add to Sidebar Drawer
-    const row = document.createElement("div");
-    row.className = "p-3 border-b border-white/5 cursor-pointer hover:bg-white/5 flex justify-between";
-    row.innerHTML = `<span class="font-bold text-xs">${u.id}</span><span class="text-[10px] text-slate-500">${u.status}</span>`;
-    row.onclick = () => map.setView(u.latlng, 18);
-    list.appendChild(row);
-});
-
-// 4. Toggle Controls
-document.querySelectorAll(".chip").forEach(btn => {
-    btn.addEventListener("click", () => {
-        const layerKey = btn.dataset.layer;
-        btn.classList.toggle("active");
-        if (map.hasLayer(layers[layerKey])) {
-            map.removeLayer(layers[layerKey]);
-        } else {
-            map.addLayer(layers[layerKey]);
-        }
-    });
-});
-
-// 5. Drawer Collapse
-document.getElementById("drawerToggle").onclick = () => {
-    document.getElementById("unitDrawer").classList.toggle("collapsed");
-};
-
-// 6. Simulation Logic
-const updates = [
-    "Smoke visible from Roof Alpha side.",
-    "E-101: Establishing Command. Requesting 2nd alarm.",
-    "PD: Perimeter established at Main St."
-];
-let idx = 0;
-
-document.getElementById("simulateBtn").onclick = () => {
-    const text = updates[idx % updates.length];
-    const el = document.createElement("div");
-    el.className = "border-l-2 border-orange-500 pl-3 py-2 mb-2 text-sm bg-white/5";
-    el.innerHTML = `<span class="text-blue-400 text-[10px] block font-mono">[${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}]</span>${text}`;
-    document.getElementById("callNotes").prepend(el);
-    idx++;
-};
+// Clock update
+setInterval(() => {
+    document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+}, 1000);
