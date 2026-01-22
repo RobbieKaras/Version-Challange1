@@ -1,77 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frontline Atlas | Demo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontline Atlas | Demo</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="bg-slate-900 text-slate-100 overflow-hidden font-sans">
 
-    <div class="absolute top-0 left-0 w-full h-8 bg-black/50 backdrop-blur-md z-[2000] flex justify-between items-center px-4 border-b border-white/10">
-        <div class="flex items-center gap-4 text-[10px] font-bold tracking-widest uppercase">
-            <span class="text-orange-500">FirstNet: Connected</span>
-            <span class="text-slate-400">GPS: High Accuracy</span>
+  <!-- Top status bar -->
+  <div class="absolute top-0 left-0 w-full h-8 bg-black/50 backdrop-blur-md z-[2000] flex justify-between items-center px-4 border-b border-white/10">
+    <div class="flex items-center gap-4 text-[10px] font-bold tracking-widest uppercase">
+      <span id="firstnetStatus" class="text-orange-500">FirstNet: Connected</span>
+      <span class="text-slate-400">GPS: High Accuracy</span>
+    </div>
+    <div id="clock" class="text-[10px] font-mono text-slate-300">--:--:--</div>
+  </div>
+
+  <div class="dashboard-container">
+    <main class="relative flex-grow h-full pt-8">
+      <div id="map"></div>
+
+      <!-- Logo / Title -->
+      <div class="absolute top-12 left-6 z-[1000] bg-slate-900/90 p-4 rounded-xl border border-slate-700 shadow-2xl">
+        <h1 class="text-xl font-black text-orange-500 italic">FRONTLINE <span class="text-white">ATLAS</span></h1>
+        <p class="text-[9px] uppercase font-bold text-slate-400">Incident Command View</p>
+      </div>
+
+      <!-- Unit Drawer -->
+      <div id="unitDrawer" class="absolute bottom-24 left-6 z-[1000] w-72 bg-slate-900/90 border border-slate-700 rounded-xl shadow-xl backdrop-blur-md">
+        <div class="flex justify-between items-center p-3 border-b border-slate-700">
+          <div>
+            <div class="text-sm font-black">Units</div>
+            <div class="text-[10px] text-slate-400">Tap to center</div>
+          </div>
+          <button id="drawerToggle" class="text-xs bg-slate-800 px-2 py-1 rounded border border-slate-600">▾</button>
         </div>
-        <div id="clock" class="text-[10px] font-mono text-slate-300">14:20:00</div>
-    </div>
 
-    <div class="dashboard-container">
-        <main class="relative flex-grow h-full pt-8">
-            <div id="map"></div>
-            
-            <div class="absolute top-12 left-6 z-[1000] bg-slate-900/90 p-4 rounded-xl border border-slate-700 shadow-2xl">
-                <h1 class="text-xl font-black text-orange-500 italic">FRONTLINE <span class="text-white">ATLAS</span></h1>
-                <p class="text-[9px] uppercase font-bold text-slate-400">Incident Command View</p>
+        <div id="unitList" class="max-h-56 overflow-y-auto"></div>
+      </div>
+
+      <!-- Bottom Layer Bar -->
+      <div class="absolute bottom-6 left-6 right-[420px] z-[1000] flex items-center gap-2 bg-slate-900/80 border border-slate-700 backdrop-blur-md p-3 rounded-xl shadow-xl">
+        <button class="layer-btn active" data-layer="units">🚒 Units</button>
+        <button class="layer-btn active" data-layer="incident">🔥 Incident</button>
+        <button class="layer-btn" data-layer="hydrants">💧 Hydrants</button>
+        <button class="layer-btn" data-layer="closures">🚧 Closures</button>
+        <button class="layer-btn" data-layer="lz">🚁 LZ</button>
+
+        <div class="ml-auto flex gap-2">
+          <button id="simulateBtn" class="bg-red-700/30 hover:bg-red-700/50 border border-red-600 px-4 py-2 rounded-lg text-xs font-black transition">
+            Simulate Dispatch Update
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right panel -->
+    <aside class="side-panel bg-slate-800 border-l border-slate-700 pt-8 shadow-2xl">
+      <div class="p-6 border-b border-slate-700 bg-slate-900/40">
+        <div class="flex justify-between items-center mb-2">
+          <span class="bg-red-600 text-[10px] font-black px-2 py-1 rounded">STRUCTURE FIRE</span>
+          <span class="text-slate-500 font-mono text-[10px]">INC# 2026-0422</span>
+        </div>
+        <h2 class="text-2xl font-bold">1289 Main St</h2>
+        <p class="text-slate-400 text-xs font-medium">Harrisonburg, VA</p>
+      </div>
+
+      <div class="flex-grow overflow-y-auto p-6 space-y-6 no-scrollbar">
+        <div class="space-y-3">
+          <div class="bg-amber-900/20 border border-amber-600/40 p-4 rounded-xl">
+            <h3 class="text-amber-500 font-black text-[10px] uppercase tracking-widest mb-1">Access Notes</h3>
+            <p class="text-sm">Gate Code: <span class="font-mono text-white font-bold">#1908</span>. Rear Side-C blocked by fencing.</p>
+          </div>
+
+          <div class="bg-red-900/30 border border-red-600/50 p-4 rounded-xl hazard-pulse">
+            <h3 class="text-red-500 font-black text-[10px] uppercase tracking-widest mb-1">Active Hazards</h3>
+            <p class="text-sm text-slate-200">Basement O2 storage Alpha Quad.</p>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-slate-500 font-black text-[10px] uppercase tracking-widest">Live Call Notes</h3>
+            <span class="text-[10px] font-mono text-slate-500">Dispatch updating en route</span>
+          </div>
+
+          <div id="dispatch-feed" class="space-y-4 font-mono text-[12px]">
+            <div class="feed-entry opacity-50">
+              <span class="text-blue-400">[14:20]</span> DISPATCH: Call received. Smoke from residence.
             </div>
+          </div>
+        </div>
+      </div>
 
-            <div class="absolute bottom-10 left-6 z-[1000] flex gap-2">
-                <button onclick="toggleLayer('units')" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-xs font-bold transition">🚒 Units</button>
-                <button onclick="toggleLayer('hydrants')" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-xs font-bold transition">💧 Hydrants</button>
-            </div>
-        </main>
+      <div class="demo-footer">
+        Prototype — Demo Data Only
+      </div>
+    </aside>
+  </div>
 
-        <aside class="side-panel bg-slate-800 border-l border-slate-700 pt-8 shadow-2xl">
-            <div class="p-6 border-b border-slate-700 bg-slate-900/40">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="bg-red-600 text-[10px] font-black px-2 py-1 rounded">STRUCTURE FIRE</span>
-                    <span class="text-slate-500 font-mono text-[10px]">INC# 2026-0422</span>
-                </div>
-                <h2 class="text-2xl font-bold">1289 Main St</h2>
-                <p class="text-slate-400 text-xs font-medium">Harrisonburg, VA</p>
-            </div>
-
-            <div class="flex-grow overflow-y-auto p-6 space-y-6 no-scrollbar">
-                <div class="space-y-3">
-                    <div class="bg-amber-900/20 border border-amber-600/40 p-4 rounded-xl">
-                        <h3 class="text-amber-500 font-black text-[10px] uppercase tracking-widest mb-1">Access Notes</h3>
-                        <p class="text-sm">Gate Code: <span class="font-mono text-white font-bold">#1908</span>. Rear Side-C blocked by fencing.</p>
-                    </div>
-                    <div class="bg-red-900/30 border border-red-600/50 p-4 rounded-xl hazard-pulse">
-                        <h3 class="text-red-500 font-black text-[10px] uppercase tracking-widest mb-1">Active Hazards</h3>
-                        <p class="text-sm text-slate-200">Basement O2 storage Alpha Quad.</p>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="text-slate-500 font-black text-[10px] uppercase tracking-widest mb-4">Live Call Notes</h3>
-                    <div id="dispatch-feed" class="space-y-4 font-mono text-[12px]">
-                        <div class="feed-entry opacity-50">
-                            <span class="text-blue-400">[14:20]</span> DISPATCH: Call received. Smoke from residence.
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="demo-footer">
-                Prototype — Demo Data Only
-            </div>
-        </aside>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="script.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
