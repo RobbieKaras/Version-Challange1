@@ -1,60 +1,117 @@
 /* Layout Strategy */
 .dashboard-container {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
+  display: flex;
+  height: 100vh;
+  width: 100vw;
 }
 
 #map {
-    height: 100%;
-    width: 100%;
+  height: 100%;
+  width: 100%;
 }
 
 .side-panel {
-    width: 400px;
-    display: flex;
-    flex-direction: column;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Animations */
 .hazard-pulse {
-    animation: pulse-border 2s infinite;
+  animation: pulse-border 2s infinite;
 }
 
 @keyframes pulse-border {
-    0% { border-color: rgba(220, 38, 38, 0.5); }
-    50% { border-color: rgba(220, 38, 38, 1); box-shadow: 0 0 10px rgba(220, 38, 38, 0.3); }
-    100% { border-color: rgba(220, 38, 38, 0.5); }
+  0% { border-color: rgba(220, 38, 38, 0.5); }
+  50% { border-color: rgba(220, 38, 38, 1); box-shadow: 0 0 10px rgba(220, 38, 38, 0.3); }
+  100% { border-color: rgba(220, 38, 38, 0.5); }
 }
 
 .feed-entry {
-    border-left: 2px solid #f97316;
-    padding-left: 10px;
-    animation: slideIn 0.5s ease-out;
+  border-left: 2px solid #f97316;
+  padding-left: 10px;
+  animation: slideIn 0.5s ease-out;
 }
 
 @keyframes slideIn {
-    from { opacity: 0; transform: translateX(10px); }
-    to { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 /* UI Cleanup */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .demo-footer {
-    padding: 8px;
-    text-align: center;
-    font-size: 9px;
-    color: #475569;
-    background: #020617;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+  padding: 8px;
+  text-align: center;
+  font-size: 9px;
+  color: #475569;
+  background: #020617;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .unit-label {
-    background: #0f172a;
-    border: 1px solid #334155;
-    color: white;
-    font-weight: bold;
-    font-size: 10px;
-    padding: 2px 6px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: white;
+  font-weight: bold;
+  font-size: 10px;
+  padding: 2px 6px;
 }
+
+/* Bottom bar buttons */
+.layer-btn {
+  background: rgba(30,41,59,0.9);
+  border: 1px solid rgba(148,163,184,0.35);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  transition: 120ms ease;
+}
+.layer-btn:hover {
+  background: rgba(51,65,85,0.9);
+}
+.layer-btn.active {
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.22);
+}
+
+/* Unit drawer rows */
+.unit-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(148,163,184,0.12);
+}
+.unit-row:hover {
+  background: rgba(255,255,255,0.06);
+}
+.unit-name {
+  color: #fff;
+  font-weight: 900;
+  font-size: 13px;
+}
+.unit-meta {
+  color: rgba(226,232,240,0.75);
+  font-size: 11px;
+  margin-top: 2px;
+}
+.unit-status {
+  color: rgba(226,232,240,0.9);
+  font-weight: 800;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+#unitDrawer.collapsed #unitList {
+  display: none;
+}
+
+/* Small leaflet polish */
+.leaflet-tooltip.unit-label {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+
