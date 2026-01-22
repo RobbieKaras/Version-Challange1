@@ -1,137 +1,60 @@
-/* 1. RESET & BASE LAYOUT */
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    background-color: #0f172a; /* Slate-900 */
-    color: #f1f5f9;
-    overflow: hidden; /* Prevents double scrollbars */
-}
-
+/* Layout Strategy */
 .dashboard-container {
     display: flex;
     height: 100vh;
     width: 100vw;
 }
 
-/* 2. MAP AREA (70%) */
 #map {
-    flex: 7; 
-    height: 100% !important; /* Forces the map to fill the container */
+    height: 100%;
     width: 100%;
-    z-index: 1; /* Keeps map at the bottom layer */
 }
 
-/* 3. SIDE PANEL (30%) */
-aside {
-    flex: 3;
-    min-width: 380px;
-    background: #1e293b; /* Slate-800 */
-    border-left: 1px solid #334155;
+.side-panel {
+    width: 400px;
     display: flex;
     flex-direction: column;
-    z-index: 1001;
-    box-shadow: -10px 0 20px rgba(0,0,0,0.5);
 }
 
-/* 4. OVERLAYS (Bottom Bar & Drawer) */
-.bottom-bar {
-    position: absolute;
-    left: 20px;
-    right: 400px; /* Leaves room for the sidebar */
-    bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    border-radius: 16px;
-    background: rgba(15, 23, 42, 0.85); /* Transparent dark blue */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px); /* Blurred glass effect */
-    z-index: 1000;
-}
-
-.unit-drawer {
-    position: absolute;
-    left: 20px;
-    bottom: 95px;
-    width: 280px;
-    border-radius: 16px;
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    z-index: 1000;
-    transition: all 0.3s ease;
-    overflow: hidden;
-}
-
-/* 5. COMPONENTS (Buttons & Chips) */
-.chip {
-    padding: 6px 14px;
-    border-radius: 99px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    color: #94a3b8;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.chip.active {
-    background: rgba(59, 130, 246, 0.2);
-    border-color: #3b82f6;
-    color: #fff;
-}
-
-.primary-btn {
-    background: #ef4444; /* Emergency Red */
-    color: white;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-}
-
-.primary-btn:active {
-    transform: scale(0.95);
-}
-
-/* 6. ANIMATIONS & REFINEMENT */
+/* Animations */
 .hazard-pulse {
-    animation: pulse-red 2s infinite;
+    animation: pulse-border 2s infinite;
 }
 
-@keyframes pulse-red {
-    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+@keyframes pulse-border {
+    0% { border-color: rgba(220, 38, 38, 0.5); }
+    50% { border-color: rgba(220, 38, 38, 1); box-shadow: 0 0 10px rgba(220, 38, 38, 0.3); }
+    100% { border-color: rgba(220, 38, 38, 0.5); }
 }
 
 .feed-entry {
-    border-left: 3px solid #f97316;
-    padding-left: 12px;
-    margin-bottom: 12px;
-    animation: slideIn 0.4s ease-out;
+    border-left: 2px solid #f97316;
+    padding-left: 10px;
+    animation: slideIn 0.5s ease-out;
 }
 
 @keyframes slideIn {
-    from { opacity: 0; transform: translateX(20px); }
+    from { opacity: 0; transform: translateX(10px); }
     to { opacity: 1; transform: translateX(0); }
 }
 
-/* Hide scrollbars but allow scrolling */
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-.no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+/* UI Cleanup */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.demo-footer {
+    padding: 8px;
+    text-align: center;
+    font-size: 9px;
+    color: #475569;
+    background: #020617;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-/* Collapsed state for Drawer */
-.unit-drawer.collapsed {
-    max-height: 50px;
+.unit-label {
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: white;
+    font-weight: bold;
+    font-size: 10px;
+    padding: 2px 6px;
 }
