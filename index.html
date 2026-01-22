@@ -3,51 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frontline Atlas | First Responder Situational Awareness</title>
-    
+    <title>Frontline Atlas | Prototype</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <style>
-        #map { height: 100vh; width: 100%; z-index: 1; }
-        
-        /* Pulse for Hazards */
-        .hazard-glow {
-            animation: pulse-red 2s infinite;
-            border-radius: 50%;
-        }
-
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        /* Styling for the live feed entries */
-        .feed-entry {
-            border-left: 3px solid #f97316;
-            padding-left: 12px;
-            margin-bottom: 12px;
-            animation: slideIn 0.4s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        /* Hide Scrollbar for clean UI */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-slate-900 text-slate-100 overflow-hidden font-sans">
 
     <div class="flex h-screen w-full">
         <main class="relative flex-grow">
             <div id="map"></div>
-            
             <div class="absolute top-6 left-12 z-[1000] bg-slate-900/95 p-4 rounded-xl border border-slate-700 shadow-2xl backdrop-blur-md">
                 <h1 class="text-2xl font-black tracking-tighter text-orange-500 italic">FRONTLINE <span class="text-white not-italic">ATLAS</span></h1>
                 <div class="flex items-center gap-2 mt-1">
@@ -58,7 +23,6 @@
         </main>
 
         <aside class="w-[420px] bg-slate-800 border-l border-slate-700 flex flex-col shadow-2xl z-[1001]">
-            
             <div class="p-6 border-b border-slate-700 bg-slate-900/80">
                 <div class="flex justify-between items-start mb-3">
                     <span class="bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wider">Structure Fire</span>
@@ -69,125 +33,35 @@
             </div>
 
             <div class="flex-grow overflow-y-auto p-6 space-y-6 no-scrollbar">
-                
                 <section class="space-y-4">
                     <div class="bg-amber-900/20 border border-amber-600/40 p-4 rounded-xl">
                         <h3 class="text-amber-500 font-black text-[11px] uppercase tracking-widest mb-2">Access Notes</h3>
-                        <p class="text-sm text-amber-100/90 leading-relaxed">Gate Code: <span class="font-mono text-lg text-white font-bold px-1 bg-amber-800/50 rounded">#1908</span>. Use Side-A (East) for primary entry. Side-C obstructed by construction fencing.</p>
+                        <p class="text-sm text-amber-100/90 leading-relaxed">Gate Code: <span class="font-mono text-lg text-white font-bold px-1 bg-amber-800/50 rounded">#1908</span>.</p>
                     </div>
-
                     <div class="bg-red-900/30 border border-red-600/50 p-4 rounded-xl">
                         <div class="flex items-center gap-2 mb-2">
                             <div class="w-3 h-3 bg-red-500 rounded-full hazard-glow"></div>
                             <h3 class="text-red-500 font-black text-[11px] uppercase tracking-widest">Active Hazards</h3>
                         </div>
                         <ul class="text-sm space-y-2 text-slate-200 font-medium">
-                            <li class="flex gap-2"><span>•</span> Basement oxygen tank storage (Alpha Quad)</li>
-                            <li class="flex gap-2"><span>•</span> Known structural weakness in Roof (Rear)</li>
+                            <li class="flex gap-2"><span>•</span> Basement oxygen tank storage</li>
                         </ul>
                     </div>
                 </section>
 
                 <section>
-                    <h3 class="text-slate-500 font-black text-[11px] uppercase tracking-widest mb-4 flex justify-between">
-                        Live Call Notes
-                        <span class="text-blue-400 animate-pulse italic lowercase font-normal">Updating...</span>
-                    </h3>
+                    <h3 class="text-slate-500 font-black text-[11px] uppercase tracking-widest mb-4 flex justify-between">Live Call Notes</h3>
                     <div id="dispatch-feed" class="space-y-4 font-mono text-[13px]">
                         <div class="feed-entry opacity-60">
-                            <span class="text-blue-400 font-bold">[14:20]</span> DISPATCH: Call received. Multiple 911 reports of smoke from residential structure.
+                            <span class="text-blue-400 font-bold">[14:20]</span> DISPATCH: Call received.
                         </div>
                     </div>
                 </section>
-            </div>
-
-            <div class="p-4 bg-slate-900 border-t border-slate-700 grid grid-cols-3 gap-2">
-                <div class="bg-slate-800 p-2 rounded-lg text-center border border-slate-700">
-                    <span class="block text-[10px] font-bold text-slate-500 uppercase">Engine 101</span>
-                    <span class="text-[11px] font-bold text-green-500">EN ROUTE</span>
-                </div>
-                <div class="bg-slate-800 p-2 rounded-lg text-center border border-slate-700">
-                    <span class="block text-[10px] font-bold text-slate-500 uppercase">Truck 04</span>
-                    <span class="text-[11px] font-bold text-green-500">EN ROUTE</span>
-                </div>
-                <div class="bg-slate-800 p-2 rounded-lg text-center border border-slate-700">
-                    <span class="block text-[10px] font-bold text-slate-500 uppercase">Medic 22</span>
-                    <span class="text-[11px] font-bold text-blue-400">STAGED</span>
-                </div>
             </div>
         </aside>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <script>
-        // 1. Initialize Map centered on the incident
-        const incidentCoords = [38.4495, -78.8689];
-        const map = L.map('map', { zoomControl: false, attributionControl: false }).setView(incidentCoords, 16);
-
-        // 2. Add Dark Mode Basemap
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19
-        }).addTo(map);
-
-        // 3. Custom Icons
-        const createUnitIcon = (color) => L.divIcon({
-            className: 'custom-unit',
-            html: `<div style="background-color: ${color}; width: 14px; height: 14px; border: 2px solid white; border-radius: 3px; transform: rotate(45deg); box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
-            iconSize: [14, 14]
-        });
-
-        // 4. Add Items to Map
-        // Incident
-        const fireIcon = L.divIcon({
-            className: 'hazard-glow',
-            html: '<div class="bg-red-600 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white text-base shadow-2xl">🔥</div>',
-            iconSize: [32, 32]
-        });
-        L.marker(incidentCoords, {icon: fireIcon}).addTo(map);
-
-        // Responding Units
-        L.marker([38.4520, -78.8660], {icon: createUnitIcon('#ef4444')}).addTo(map).bindTooltip("Engine 101", {permanent: true, direction: 'right', className: 'bg-slate-900 border-none text-white font-bold text-[10px]'});
-        L.marker([38.4470, -78.8710], {icon: createUnitIcon('#ef4444')}).addTo(map).bindTooltip("Truck 04", {permanent: true, direction: 'right', className: 'bg-slate-900 border-none text-white font-bold text-[10px]'});
-        L.marker([38.4455, -78.8650], {icon: createUnitIcon('#3b82f6')}).addTo(map).bindTooltip("Medic 22", {permanent: true, direction: 'right', className: 'bg-slate-900 border-none text-white font-bold text-[10px]'});
-
-        // Hydrants (Demo Data)
-        const hydrantIcon = L.divIcon({
-            html: '<div class="w-2 h-2 bg-blue-500 rounded-full border border-white"></div>',
-            iconSize: [8, 8]
-        });
-        L.marker([38.4490, -78.8700], {icon: hydrantIcon}).addTo(map);
-        L.marker([38.4505, -78.8680], {icon: hydrantIcon}).addTo(map);
-
-        // 5. LIVE DISPATCH SIMULATION (Phase 3)
-        const simulationNotes = [
-            { time: "14:21", text: "UPDATE: Caller reports fire is spreading to second floor Alpha/Delta corner." },
-            { time: "14:22", text: "PD ON SCENE: Heavy black smoke showing. Traffic control established at Mason St." },
-            { time: "14:23", text: "RESCUE 1: Responding from Station 2. ETA 4 minutes." },
-            { time: "14:25", text: "ENGINE 101: On Scene. Laying 5-inch supply line from Main & Mason hydrant." },
-            { time: "14:26", text: "COMMAND: Incident upgraded to 2nd Alarm. Requesting additional Medic." }
-        ];
-
-        let noteIndex = 0;
-        const feedContainer = document.getElementById('dispatch-feed');
-
-        function triggerNextNote() {
-            if (noteIndex < simulationNotes.length) {
-                const note = simulationNotes[noteIndex];
-                const noteDiv = document.createElement('div');
-                noteDiv.className = "feed-entry";
-                noteDiv.innerHTML = `<span class="text-blue-400 font-bold">[${note.time}]</span> <span class="text-slate-200">${note.text}</span>`;
-                
-                feedContainer.prepend(noteDiv); // Latest on top
-                noteIndex++;
-            }
-        }
-
-        // Run simulation every 7 seconds for the demo
-        setTimeout(() => {
-            setInterval(triggerNextNote, 7000);
-        }, 4000);
-
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
