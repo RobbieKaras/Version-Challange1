@@ -1,57 +1,56 @@
-// 1. Initialize Map
-const incidentCoords = [38.4495, -78.8689];
-const map = L.map('map', { zoomControl: false, attributionControl: false }).setView(incidentCoords, 16);
+// 1. Setup Map
+const incidentLoc = [38.4495, -78.8689];
+const map = L.map('map', { zoomControl: false }).setView(incidentLoc, 16);
 
-// 2. Add Dark Mode Basemap
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+// 2. Layer Management
+const unitLayer = L.layerGroup().addTo(map);
+const hydrantLayer = L.layerGroup().addTo(map);
+
+// 3. Add Demo Data
+// Fire Incident
+L.marker(incidentLoc, {
+    icon: L.divIcon({
+        className: 'hazard-pulse',
+        html: '<div class="bg-red-600 w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-sm">🔥</div>',
+        iconSize: [32, 32]
+    })
 }).addTo(map);
 
-// 3. Custom Marker Helpers
-const createUnitIcon = (color) => L.divIcon({
-    className: 'custom-unit',
-    html: `<div style="background-color: ${color}; width: 14px; height: 14px; border: 2px solid white; border-radius: 3px; transform: rotate(45deg);"></div>`,
-    iconSize: [14, 14]
-});
+// Units
+const engineIcon = L.divIcon({ className: 'bg-red-500 w-3 h-3 rounded-sm border border-white' });
+L.marker([38.4510, -78.8675], { icon: engineIcon }).addTo(unitLayer).bindTooltip("E-101", { permanent: true, className: 'unit-label' });
 
-// 4. Add Map Elements
-// The Incident
-const fireIcon = L.divIcon({
-    className: 'hazard-glow',
-    html: '<div class="bg-red-600 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white text-base">🔥</div>',
-    iconSize: [32, 32]
-});
-L.marker(incidentCoords, {icon: fireIcon}).addTo(map);
+// Hydrants
+L.circleMarker([38.4491, -78.8698], { radius: 5, color: '#3b82f6', fillOpacity: 0.8 }).addTo(hydrantLayer);
 
-// The Units
-L.marker([38.4520, -78.8660], {icon: createUnitIcon('#ef4444')}).addTo(map)
-    .bindTooltip("Engine 101", {permanent: true, direction: 'right', className: 'unit-label'});
-
-L.marker([38.4470, -78.8710], {icon: createUnitIcon('#ef4444')}).addTo(map)
-    .bindTooltip("Truck 04", {permanent: true, direction: 'right', className: 'unit-label'});
-
-// 5. Simulation Logic (Phase 3)
-const simulationNotes = [
-    { time: "14:21", text: "UPDATE: Smoke increasing from Roof Alpha side." },
-    { time: "14:22", text: "PD ON SCENE: Heavy black smoke showing." },
-    { time: "14:25", text: "ENGINE 101: On Scene. Laying 5-inch supply line." }
-];
-
-let noteIndex = 0;
-const feedContainer = document.getElementById('dispatch-feed');
-
-function triggerNextNote() {
-    if (noteIndex < simulationNotes.length) {
-        const note = simulationNotes[noteIndex];
-        const noteDiv = document.createElement('div');
-        noteDiv.className = "feed-entry";
-        noteDiv.innerHTML = `<span class="text-blue-400 font-bold">[${note.time}]</span> <span class="text-slate-200">${note.text}</span>`;
-        feedContainer.prepend(noteDiv);
-        noteIndex++;
-    }
+// 4. Toggle Logic
+function toggleLayer(name) {
+    const layer = name === 'units' ? unitLayer : hydrantLayer;
+    map.hasLayer(layer) ? map.removeLayer(layer) : map.addLayer(layer);
 }
 
-// Start simulation after 4 seconds
-setTimeout(() => {
-    setInterval(triggerNextNote, 6000);
-}, 4000);
+// 5. Live Feed Simulation
+const demoNotes = [
+    "PD on scene: Smoke confirmed from Side Alpha.",
+    "E-101: Arriving on scene. Setting up Command.",
+    "CAUTION: Basement storage includes highly flammable oxidizers.",
+    "TRUCK 04: Primary search initiated on Floor 1."
+];
+
+let noteIdx = 0;
+setInterval(() => {
+    if (noteIdx < demoNotes.length) {
+        const div = document.createElement('div');
+        div.className = "feed-entry";
+        div.innerHTML = `<span class="text-blue-400">[${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}]</span> ${demoNotes[noteIdx]}`;
+        document.getElementById('dispatch-feed').prepend(div);
+        noteIdx++;
+    }
+}, 8000);
+
+// Clock update
+setInterval(() => {
+    document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+}, 1000);
