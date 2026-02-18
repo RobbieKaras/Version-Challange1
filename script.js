@@ -12,7 +12,6 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; OpenStreetMap &copy; CARTO'
 }).addTo(map);
 
-// Optional: scale bar makes it feel more “GIS real”
 L.control.scale({ imperial: true, metric: true }).addTo(map);
 
 // 2) Layer Management (toggles control these)
@@ -45,7 +44,7 @@ const incidentMarker = L.marker(incidentLoc, {
 
 incidentMarker.addTo(layers.incident);
 
-// Units (more units makes map feel alive)
+// Units
 const units = [
   { id: "E-101", type: "Engine", status: "On Scene", eta: "0:00", latlng: [38.4510, -78.8675] },
   { id: "T-04",  type: "Truck",  status: "Operating", eta: "—",   latlng: [38.4499, -78.8679] },
@@ -56,7 +55,6 @@ const units = [
 
 const unitMarkers = new Map();
 
-// Simple icon by unit type (keeps it readable)
 function unitIconEmoji(type) {
   switch (type) {
     case "Engine": return "🚒";
@@ -76,7 +74,7 @@ units.forEach(u => {
       html: `<div class="bg-slate-900/90 border border-slate-600 rounded-lg px-2 py-1 text-[12px] font-black">
               <span class="mr-1">${unitIconEmoji(u.type)}</span>${u.id}
             </div>`,
-      iconSize: [64, 28]
+      iconSize: [72, 28]
     })
   }).bindPopup(`<b>${u.id}</b><br>${u.type}<br>Status: ${u.status}<br>ETA: ${u.eta}`);
 
@@ -113,7 +111,7 @@ const lzPoly = L.polygon([
 ]).bindTooltip("Helicopter LZ");
 lzPoly.addTo(layers.lz);
 
-// Start with incident + units visible
+// Start visibility
 setLayerVisible("hydrants", false);
 setLayerVisible("closures", false);
 setLayerVisible("lz", false);
@@ -152,7 +150,6 @@ function renderUnitList() {
     unitListEl.appendChild(row);
   });
 }
-
 renderUnitList();
 
 // Drawer collapse
@@ -161,7 +158,7 @@ document.getElementById("drawerToggle").addEventListener("click", () => {
   drawer.classList.toggle("collapsed");
 });
 
-// 6) Live Call Notes simulation (button + optional timed drip)
+// 6) Live Call Notes (auto + manual typing)
 const feedEl = document.getElementById('dispatch-feed');
 
 function nowTimeShort() {
@@ -169,6 +166,14 @@ function nowTimeShort() {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+function prependFeedEntry(who, text, tone = "text-blue-400") {
+  const div = document.createElement('div');
+  div.className = "feed-entry";
+  div.innerHTML = `<span class="${tone}">[${nowTimeShort()}]</span> ${who}: ${text}`;
+  feedEl.prepend(div);
+}
+
+// Button-driven updates
 const demoNotes = [
   { who: "DISPATCH", text: "Caller reports flames visible from rear window." },
   { who: "DISPATCH", text: "Neighbor reports elderly occupant may still be inside." },
@@ -180,20 +185,13 @@ const demoNotes = [
 
 let noteIdx = 0;
 
-function prependFeedEntry(who, text, tone = "text-blue-400") {
-  const div = document.createElement('div');
-  div.className = "feed-entry";
-  div.innerHTML = `<span class="${tone}">[${nowTimeShort()}]</span> ${who}: ${text}`;
-  feedEl.prepend(div);
-}
-
 document.getElementById("simulateBtn").addEventListener("click", () => {
   const note = demoNotes[noteIdx % demoNotes.length];
   prependFeedEntry(note.who, note.text);
   noteIdx++;
 });
 
-// Optional: also drip updates every 10s (comment out if you want only button-driven)
+// Optional timed drip (comment out if you only want manual/button)
 setInterval(() => {
   if (noteIdx < demoNotes.length) {
     const note = demoNotes[noteIdx];
@@ -202,24 +200,23 @@ setInterval(() => {
   }
 }, 10000);
 
+// NEW: manual dispatch typing
+const dispatchInput = document.getElementById("dispatchInput");
+const dispatchSend = document.getElementById("dispatchSend");
+
+function addDispatchNote(text) {
+  const trimmed = (text || "").trim();
+  if (!trimmed) return;
+  prependFeedEntry("DISPATCH", trimmed);
+  dispatchInput.value = "";
+}
+
+dispatchSend.addEventListener("click", () => addDispatchNote(dispatchInput.value));
+dispatchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") addDispatchNote(dispatchInput.value);
+});
+
 // 7) Clock update
 setInterval(() => {
   document.getElementById('clock').innerText = new Date().toLocaleTimeString();
 }, 1000);
-
-// 8) Optional: fake FirstNet degradation toggle (easy “wow” demo)
-// Uncomment to simulate changes every ~25s
-/*
-const firstnetEl = document.getElementById("firstnetStatus");
-let ok = true;
-setInterval(() => {
-  ok = !ok;
-  if(ok){
-    firstnetEl.textContent = "FirstNet: Connected";
-    firstnetEl.className = "text-orange-500";
-  }else{
-    firstnetEl.textContent = "FirstNet: Degraded";
-    firstnetEl.className = "text-yellow-400";
-  }
-}, 25000);
-*/
