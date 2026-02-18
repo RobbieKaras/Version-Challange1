@@ -12,7 +12,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 
 L.control.scale({ imperial: true, metric: true }).addTo(map);
 
-// Layer groups (toggles control these)
+// Layer groups
 const layers = {
   incident: L.layerGroup().addTo(map),
   units: L.layerGroup().addTo(map),
@@ -101,12 +101,12 @@ L.polygon([
 ]).bindTooltip("Helicopter LZ")
   .addTo(layers.lz);
 
-// Initial visibility: hydrants/closures/lz off
+// Initial visibility
 setLayerVisible("hydrants", false);
 setLayerVisible("closures", false);
 setLayerVisible("lz", false);
 
-// Toggle buttons
+// Toggle buttons (bottom bar)
 document.querySelectorAll(".layer-btn[data-layer]").forEach(btn => {
   btn.addEventListener("click", () => {
     const key = btn.dataset.layer;
@@ -116,7 +116,7 @@ document.querySelectorAll(".layer-btn[data-layer]").forEach(btn => {
   });
 });
 
-// Unit drawer list
+// Unit drawer
 const unitListEl = document.getElementById("unitList");
 function renderUnitList() {
   if (!unitListEl) return;
@@ -161,7 +161,15 @@ function prependFeedEntry(who, text, tone = "text-blue-400") {
   if (!feedEl) return;
   const div = document.createElement("div");
   div.className = "feed-entry";
-  div.innerHTML = `<span class="${tone}">[${nowTimeShort()}]</span> ${who}: ${text}`;
+
+  // Tone by source (optional but nice)
+  let t = tone;
+  if (who === "DISPATCH") t = "text-blue-400";
+  else if (who.startsWith("E-") || who.startsWith("T-") || who.startsWith("BC-")) t = "text-emerald-400";
+  else if (who.startsWith("M-")) t = "text-cyan-400";
+  else if (who.startsWith("PD-")) t = "text-indigo-400";
+
+  div.innerHTML = `<span class="${t}">[${nowTimeShort()}]</span> ${who}: ${text}`;
   feedEl.prepend(div);
 }
 
@@ -185,14 +193,25 @@ if (simulateBtn) {
   });
 }
 
-// Manual dispatch typing (FIXED)
+// Optional timed drip (keeps it “alive”)
+setInterval(() => {
+  if (noteIdx < demoNotes.length) {
+    const note = demoNotes[noteIdx];
+    prependFeedEntry(note.who, note.text);
+    noteIdx++;
+  }
+}, 10000);
+
+// Manual typing with source dropdown
 const dispatchInput = document.getElementById("dispatchInput");
 const dispatchSend = document.getElementById("dispatchSend");
+const dispatchSource = document.getElementById("dispatchSource");
 
 function addDispatchNote(text) {
   const trimmed = (text || "").trim();
   if (!trimmed) return;
-  prependFeedEntry("DISPATCH", trimmed);
+  const source = dispatchSource?.value || "DISPATCH";
+  prependFeedEntry(source, trimmed);
   dispatchInput.value = "";
   dispatchInput.focus();
 }
@@ -209,3 +228,20 @@ setInterval(() => {
   const clock = document.getElementById("clock");
   if (clock) clock.innerText = new Date().toLocaleTimeString();
 }, 1000);
+
+// Network degraded visual toggle (for realism)
+const firstnetEl = document.getElementById("firstnetStatus");
+let networkHealthy = true;
+
+setInterval(() => {
+  networkHealthy = !networkHealthy;
+  if (!firstnetEl) return;
+
+  if (networkHealthy) {
+    firstnetEl.textContent = "FirstNet: Connected";
+    firstnetEl.className = "text-orange-500";
+  } else {
+    firstnetEl.textContent = "Network: Degraded";
+    firstnetEl.className = "text-yellow-400";
+  }
+}, 25000);
