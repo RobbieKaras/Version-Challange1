@@ -6,7 +6,6 @@
   <title>Frontline Atlas | Demo</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css">
 </head>
@@ -33,7 +32,7 @@
       </div>
 
       <!-- Unit Drawer -->
-      <div id="unitDrawer" class="absolute bottom-24 left-6 z-[1000] w-72 bg-slate-900/90 border border-slate-700 rounded-xl shadow-xl backdrop-blur-md">
+      <div id="unitDrawer" class="absolute bottom-28 left-6 z-[1000] w-72 bg-slate-900/90 border border-slate-700 rounded-xl shadow-xl backdrop-blur-md">
         <div class="flex justify-between items-center p-3 border-b border-slate-700">
           <div>
             <div class="text-sm font-black">Units</div>
@@ -45,20 +44,40 @@
         <div id="unitList" class="max-h-56 overflow-y-auto"></div>
       </div>
 
-      <!-- Bottom Layer Bar -->
-      <div class="absolute bottom-6 left-6 right-[420px] z-[1000] flex items-center gap-2 bg-slate-900/80 border border-slate-700 backdrop-blur-md p-3 rounded-xl shadow-xl">
-        <button class="layer-btn active" data-layer="units">🚒 Units</button>
-        <button class="layer-btn active" data-layer="incident">🔥 Incident</button>
-        <button class="layer-btn" data-layer="hydrants">💧 Hydrants</button>
-        <button class="layer-btn" data-layer="closures">🚧 Closures</button>
-        <button class="layer-btn" data-layer="lz">🚁 LZ</button>
+      <!-- Bottom Layer Bar (tile style) -->
+      <div class="absolute bottom-6 left-6 right-[420px] z-[1000] flex items-center gap-3 bg-slate-900/80 border border-slate-700 backdrop-blur-md p-4 rounded-2xl shadow-xl">
 
-        <div class="ml-auto flex gap-2">
-          <!-- Now fits as a chip -->
-          <button id="simulateBtn" class="layer-btn dispatch-chip">
-            🧠 Dispatch Update
-          </button>
-        </div>
+        <button class="layer-btn tile active" data-layer="units">
+          <div class="tile-icon">🚒</div>
+          <div class="tile-label">Units</div>
+        </button>
+
+        <button class="layer-btn tile active" data-layer="incident">
+          <div class="tile-icon">🔥</div>
+          <div class="tile-label">Incident</div>
+        </button>
+
+        <button class="layer-btn tile" data-layer="hydrants">
+          <div class="tile-icon">💧</div>
+          <div class="tile-label">Hydrants</div>
+        </button>
+
+        <button class="layer-btn tile" data-layer="closures">
+          <div class="tile-icon">🚧</div>
+          <div class="tile-label">Closures</div>
+        </button>
+
+        <button class="layer-btn tile" data-layer="lz">
+          <div class="tile-icon">🚁</div>
+          <div class="tile-label">LZ</div>
+        </button>
+
+        <!-- Dispatch Update tile (fits like the others) -->
+        <button id="simulateBtn" class="layer-btn tile dispatch-tile ml-auto">
+          <div class="tile-icon">🧠</div>
+          <div class="tile-label">Dispatch</div>
+        </button>
+
       </div>
     </main>
 
@@ -92,7 +111,7 @@
             <span class="text-[10px] font-mono text-slate-500">Dispatch updating en route</span>
           </div>
 
-          <!-- NEW: Dispatch input box -->
+          <!-- Manual dispatch entry -->
           <div class="mb-3 flex gap-2">
             <input
               id="dispatchInput"
