@@ -68,6 +68,10 @@
   font-size: 12px;
   font-weight: 800;
   transition: 120ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 .layer-btn:hover {
   background: rgba(51,65,85,0.9);
@@ -75,6 +79,15 @@
 .layer-btn.active {
   background: rgba(255,255,255,0.14);
   border-color: rgba(255,255,255,0.22);
+}
+
+/* Make the dispatch button feel integrated but special */
+.dispatch-chip {
+  background: rgba(220,38,38,0.22);
+  border-color: rgba(220,38,38,0.55);
+}
+.dispatch-chip:hover {
+  background: rgba(220,38,38,0.35);
 }
 
 /* Unit drawer rows */
@@ -114,4 +127,3 @@
 .leaflet-tooltip.unit-label {
   box-shadow: 0 6px 18px rgba(0,0,0,0.35);
 }
-
